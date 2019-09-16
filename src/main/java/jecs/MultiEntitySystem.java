@@ -72,7 +72,10 @@ public abstract class MultiEntitySystem extends System
 	{
 		if (entities.containsKey (event.getEntity ().getEntityId ()))
 		{
-			processEntity (event.getEntity ());
+			if (componentKey.getComponentSignature ().contains (event.getRemovedComponentType ()))
+			{
+				processEntity (event.getEntity ());
+			}
 		}
 	}
 	
@@ -81,11 +84,25 @@ public abstract class MultiEntitySystem extends System
 	@Override
 	public void onComponentAdded (ComponentAddedEvent event)
 	{
-		if (entities.containsKey (event.getEntity ().getEntityId ()))
+		if (!entities.containsKey (event.getEntity ().getEntityId ()))
 		{
-			if (componentKey.getComponentSignature ().contains (event.getAddedComponent ().getClass ()))
+			if (componentKeys != null)
 			{
-				processEntity (event.getEntity ());
+				for (ComponentKey key : this.componentKeys)
+				{
+					if (componentKey.getComponentSignature ().contains (event.getAddedComponent ().getClass ()))
+					{
+						processEntity (event.getEntity ());
+						break;
+					}
+				}
+			}
+			else
+			{
+				if (componentKey.getComponentSignature ().contains (event.getAddedComponent ().getClass ()))
+				{
+					processEntity (event.getEntity ());
+				}
 			}
 		}
 	}

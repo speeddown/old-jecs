@@ -201,4 +201,24 @@ public class Ecs
 		
 		return null;
 	}
+	
+	public List<Entity> getEntitiesWithComponent (Class<? extends Component> componentType)
+	{
+		ArrayList<Entity> entities = new ArrayList <> ();
+		
+		for (Entity entity : this.entities)
+		{
+			if (entity.hasComponent (componentType))
+			{
+				entities.add (entity);
+			}
+		}
+		
+		return entities;
+	}
+	
+	public List<Entity> getEntities ()
+	{
+		return this.entities;
+	}
 }

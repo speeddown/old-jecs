@@ -84,6 +84,25 @@ public class ComponentKey implements GroupOperable
 			
 			case ANY:
 				return true;
+				
+			case HAS:
+				if (!(keys == null))
+				{
+					for (Class<? extends Component> key : keys)
+					{
+						if (entity.hasComponent (key))
+						{
+							return true;
+						}
+					}
+				}
+				else
+				{
+					if (key != null)
+					{
+						return entity.hasComponent (key);
+					}
+				}
 			
 			default:
 				return false;
