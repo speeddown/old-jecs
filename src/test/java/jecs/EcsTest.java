@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.easymock.EasyMock.expect;
 
@@ -42,6 +43,7 @@ public class EcsTest extends EasyMockSupport
 	public void getInstanceLoadsSceneSystems ()
 	{
 		uut = Ecs.getInstance (TestScene.class);
+		uut.loadSystem (TestSystem.class);
 		
 		Assert.assertNotNull ("Ecs instance should contain TestSystem", uut.getSystem (TestSystem.class));
 	}
@@ -50,15 +52,11 @@ public class EcsTest extends EasyMockSupport
 	{
 		public TestScene ()
 		{
-			super (() -> {
-				ArrayList<Class<? extends System>> systemTypes = new ArrayList <> ();
-				systemTypes.add (TestSystem.class);
-				return systemTypes;
-			}, () -> {
-				ArrayList<Class<? extends Entity>> entityTypes = new ArrayList <> ();
-				entityTypes.add (TestEntity.class);
-				return entityTypes;
-			});
+			super(TestEntity.class);
+			
+			protoSystems.addAll (Arrays.asList (
+				TestSystem.class
+			));
 		}
 	}
 	

@@ -1,5 +1,6 @@
 package jecs;
 
+import com.google.common.eventbus.Subscribe;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import jecs.events.ComponentAddedEvent;
@@ -29,7 +30,7 @@ public abstract class SingleEntitySystem<T extends Component> extends System
 		}
 	}
 	
-	
+	@Subscribe
 	@Override
 	public void onComponentAdded (ComponentAddedEvent event)
 	{
@@ -39,7 +40,7 @@ public abstract class SingleEntitySystem<T extends Component> extends System
 		}
 	}
 	
-	
+	@Subscribe
 	@Override
 	public void onComponentRemoved (ComponentRemovedEvent event)
 	{
@@ -49,7 +50,7 @@ public abstract class SingleEntitySystem<T extends Component> extends System
 		}
 	}
 	
-	
+	@Subscribe
 	@Override
 	public void onDestruction (DestructionEvent event)
 	{

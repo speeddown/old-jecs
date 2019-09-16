@@ -60,9 +60,12 @@ public abstract class System implements InstantiationEventListener, ComponentAdd
 		processEntity (event.getEntity ());
 	}
 	
+	@Subscribe
 	public abstract void onComponentAdded (ComponentAddedEvent event);
 	
+	@Subscribe
 	public abstract void onComponentRemoved (ComponentRemovedEvent event);
 	
+	@Subscribe
 	public abstract void onDestruction (DestructionEvent event);
 }

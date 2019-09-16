@@ -7,9 +7,7 @@ import jecs.events.ComponentRemovedEvent;
 import jecs.events.EventManager;
 import jecs.events.InstantiationEvent;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * An Entity is essentially a bag of components and does not process anything other than managing which
@@ -31,13 +29,13 @@ public class Entity
 	private HashMap <Class <? extends Component>, Component> componentMap = new HashMap ();
 	private EventManager eventManager = EventManager.getInstance ();
 	
+	private List <Class<? extends Component>> componentSignature = new ArrayList<Class<? extends Component>>();
 	
 	/**
 	 * Creates a new Entity instance and announces instantiation
 	 */
 	protected Entity ()
 	{
-		//		componentMap.put (Transform.class, new Transform ());
 		eventManager.postEvent (new InstantiationEvent (this));
 	}
 	
@@ -50,22 +48,7 @@ public class Entity
 	 */
 	public Entity (Class <? extends Component>... components)
 	{
-		//		Transform transform = new Transform ();
-		//		componentMap.put (Transform.class, transform);
-		
-		for (Class <? extends Component> component : components)
-		{
-			try
-			{
-				Component newComponent = component.newInstance ();
-				newComponent.entity = this;
-				componentMap.put (component, newComponent);
-				newComponent.start ();
-			} catch (Exception e)
-			{
-				e.printStackTrace ();
-			}
-		}
+		this.componentSignature.addAll (Arrays.asList (components));
 	}
 	
 	
@@ -103,7 +86,7 @@ public class Entity
 		T component = null;
 		try
 		{
-			component = componentType.getDeclaredConstructor ().newInstance ();
+			component = componentType.newInstance ();
 			componentMap.put (componentType, component);
 			eventManager.postEvent (new ComponentAddedEvent (component, this));
 		} catch (Exception e)
@@ -155,5 +138,10 @@ public class Entity
 	public boolean hasComponent (Class <? extends Component> key)
 	{
 		return componentMap.containsKey (key);
+	}
+
+	public List<Class<? extends Component>> getComponentSignature ()
+	{
+		return this.componentSignature;
 	}
 }

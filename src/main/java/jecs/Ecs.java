@@ -1,5 +1,7 @@
 package jecs;
 
+import jecs.builtIn.Transform;
+import jecs.events.DestructionEvent;
 import jecs.events.EventManager;
 import jecs.events.InstantiationEvent;
 import jecs.events.SystemLoadedEvent;
@@ -24,7 +26,7 @@ public class Ecs
 {
 	private static Ecs instance;
 	
-	private EventManager eventManager = new EventManager ();
+	private EventManager eventManager = null;
 	
 	private List <System> systems = new ArrayList ();
 	private List <Entity> entities = new ArrayList ();
@@ -34,14 +36,14 @@ public class Ecs
 	
 	Ecs ()
 	{
-	
+		eventManager = EventManager.getInstance ();
 	}
 	
 	Ecs (Class<? extends GameScene> scene)
 	{
-		this.initialSceneType = scene;
+		eventManager = EventManager.getInstance ();
 		
-		loadScene (scene);
+		this.initialSceneType = scene;
 	}
 	
 	public static Ecs getInstance()
@@ -66,7 +68,7 @@ public class Ecs
 	
 	public void start ()
 	{
-		loadScene (this.initialSceneType);
+		loadScene (initialSceneType);
 		
 		for (System system : systems)
 		{
@@ -88,93 +90,97 @@ public class Ecs
 		this.entities.clear ();
 	}
 	
-	
-	private void loadScene (Class<? extends GameScene> sceneType)
+	private void loadDefaultSystems ()
 	{
-		reset ();
-		
-		try
-		{
-			activeScene = sceneType.newInstance ();
-		} catch (InstantiationException | IllegalAccessException e)
-		{
-			e.printStackTrace ();
-		}
-		
 		if (activeScene != null)
 		{
-			for (Class<? extends System> protoSystem : activeScene.getProtoSystems ())
+			for(Class<? extends System> systemType : activeScene.getProtoSystems ())
 			{
-				try
-				{
-					System newSystem = protoSystem.newInstance ();
-					newSystem.start ();
-					systems.add (newSystem);
-					eventManager.postEvent (new SystemLoadedEvent (newSystem));
-				} catch (InstantiationException | IllegalAccessException e)
-				{
-					e.printStackTrace ();
-				}
-			}
-			
-			for (Class<? extends Entity> protoEntity : activeScene.getProtoEntities ())
-			{
-				try
-				{
-					Entity entity = protoEntity.newInstance ();
-					entities.add (entity);
-					eventManager.postEvent (new InstantiationEvent (entity));
-				} catch (IllegalAccessException | InstantiationException e)
-				{
-					e.printStackTrace ();
-				}
+				loadSystem (systemType);
 			}
 		}
 		else
 		{
-			java.lang.System.out.println ("Active scene is null!");
+			java.lang.System.out.println ("Could not load scene systems");
+		}
+	}
+	
+	
+	public void loadScene (Class<? extends GameScene> sceneType)
+	{
+		if (activeScene != null)
+		{
+			reset ();
 		}
 		
+		try
+		{
+			activeScene = sceneType.newInstance ();
+			if (activeScene != null)
+			{
+				for (Class <? extends System> systemClass : activeScene.getProtoSystems ())
+				{
+					loadSystem (systemClass);
+				}
+				
+				for (Class<? extends Entity> entityClass : activeScene.getProtoEntities ())
+				{
+					instantiate (entityClass);
+				}
+			}
+		} catch (Exception e)
+		{
+			e.printStackTrace ();
+		}
+	}
+	
+	public void postEvent (Object event)
+	{
+		eventManager.postEvent (event);
+	}
+	
+	public void destroy (Entity entity)
+	{
+		entities.remove (entity);
+		eventManager.postEvent (new DestructionEvent (entity));
 	}
 	
 	public <T extends System> T loadSystem (Class<T> systemType)
 	{
-		try
-		{
+		try {
 			T newSystem = systemType.newInstance ();
-			eventManager.postEvent (newSystem);
-			if (entities.size () > 0)
-			{
-				for (Entity entity : entities)
-				{
-					newSystem.processEntity (entity);
-				}
-			}
 			systems.add (newSystem);
-			newSystem.start ();
+			eventManager.register (newSystem);
+			postEvent (new SystemLoadedEvent (newSystem));
 			return newSystem;
-		} catch (InstantiationException | IllegalAccessException e)
-		{
+		} catch (Exception e) {
 			e.printStackTrace ();
+			return null;
 		}
-		
-		return null;
 	}
 	
 	public <T extends Entity> T instantiate (Class<T> entityType)
 	{
-		try
-		{
+		try{
 			T newEntity = entityType.newInstance ();
 			entities.add (newEntity);
+			
+			newEntity.addComponent (Transform.class);
+			
+			for (Class<? extends Component> componentType : newEntity.getComponentSignature ())
+			{
+				Component newComponent = componentType.newInstance ();
+				newComponent.entity = newEntity;
+				newEntity.addComponent (componentType);
+			}
+			
 			eventManager.postEvent (new InstantiationEvent (newEntity));
 			return newEntity;
-		} catch (InstantiationException | IllegalAccessException e)
+		} catch (Exception e)
 		{
 			e.printStackTrace ();
+			return null;
 		}
-		
-		return null;
 	}
 	
 	public <T extends System> T getSystem (Class<T> systemType)

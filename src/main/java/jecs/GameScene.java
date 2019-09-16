@@ -1,8 +1,7 @@
 package jecs;
 
-import jecs.util.Declarer;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -10,13 +9,17 @@ import java.util.List;
  */
 public abstract class GameScene
 {
-	private List <Class <? extends System>> protoSystems = new ArrayList <> ();
-	private List <Class <? extends Entity>> protoEntities = new ArrayList <> ();
+	protected List <Class <? extends Entity>> protoEntities = new ArrayList <> ();
+	protected List <Class <? extends System>> protoSystems = new ArrayList <> ();
 	
-	public GameScene (Declarer <System> systemDeclarer, Declarer <Entity> entityDeclarer)
+	public GameScene ()
 	{
-		this.protoSystems = systemDeclarer.getDeclarations ();
-		this.protoEntities = entityDeclarer.getDeclarations ();
+	
+	}
+	
+	public GameScene (Class<? extends Entity>...entityTypes)
+	{
+		this.protoEntities.addAll (Arrays.asList (entityTypes));
 	}
 	
 	
@@ -25,8 +28,5 @@ public abstract class GameScene
 		return protoEntities;
 	}
 	
-	public List <Class <? extends System>> getProtoSystems ()
-	{
-		return protoSystems;
-	}
+	public List <Class <? extends System>> getProtoSystems () { return protoSystems; }
 }
