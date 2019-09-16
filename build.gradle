@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+    id 'maven'
+}
+
+group 'com.lastchance'
+version '1.4.5-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile "com.google.guava:guava:18.0"
+    // https://mvnrepository.com/artifact/org.easymock/easymock
+    testCompile group: 'org.easymock', name: 'easymock', version: '4.0.2'
+}
