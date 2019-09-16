@@ -4,7 +4,6 @@ import jecs.events.EventManager;
 import jecs.events.InstantiationEvent;
 import jecs.events.SystemLoadedEvent;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
