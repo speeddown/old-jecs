@@ -5,6 +5,7 @@ import jecs.Entity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class ComponentKey implements GroupOperable
 {
@@ -80,12 +81,17 @@ public class ComponentKey implements GroupOperable
 				{
 					return entity.hasComponent (key);
 				}
-				
+			
 			case ANY:
 				return true;
 			
 			default:
 				return false;
 		}
+	}
+	
+	public List <Class<? extends Component>> getComponentSignature ()
+	{
+		return this.keys;
 	}
 }

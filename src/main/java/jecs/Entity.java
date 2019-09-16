@@ -51,6 +51,8 @@ public class Entity
 		this.componentSignature.addAll (Arrays.asList (components));
 	}
 	
+	public void start () {};
+	
 	
 	/**
 	 * Returns the Entitys UUID
@@ -88,12 +90,12 @@ public class Entity
 		{
 			component = componentType.newInstance ();
 			componentMap.put (componentType, component);
-			eventManager.postEvent (new ComponentAddedEvent (component, this));
 		} catch (Exception e)
 		{
 			e.printStackTrace ();
 		}
 		
+		eventManager.postEvent (new ComponentAddedEvent (component, this));
 		return component;
 	}
 	

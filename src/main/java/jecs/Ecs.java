@@ -74,6 +74,11 @@ public class Ecs
 		{
 			system.start ();
 		}
+		
+		for (Entity entity : entities)
+		{
+			entity.start ();
+		}
 	}
 	
 	public void update ()
@@ -174,6 +179,7 @@ public class Ecs
 				newEntity.addComponent (componentType);
 			}
 			
+			newEntity.start ();
 			eventManager.postEvent (new InstantiationEvent (newEntity));
 			return newEntity;
 		} catch (Exception e)
