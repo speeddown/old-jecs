@@ -1,31 +1,40 @@
 package jecs;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import jecs.util.componentKey.ComponentKey;
-import jecs.util.componentKey.KeyGroup;
-import jecs.util.componentKey.KeyOperator;
+import jecs.builtIn.Transform;
+import jecs.testClasses.TestEntity;
+import jecs.testClasses.TestMultiEntitySystem;
+import jecs.testClasses.TestScene;
+import jecs.util.ISystem;
+import org.easymock.EasyMock;
 import org.easymock.EasyMockSupport;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 public class EcsTest extends EasyMockSupport
 {
 	private Ecs uut;
+	
+	GameScene mockScene;
+	Entity mockEntity;
+	Component mockComponent;
+	ISystem mockSystem;
 	
 	
 	@Before
 	public void setup ()
 	{
 		uut = null;
+		
+		mockScene = EasyMock.createNiceMock (GameScene.class);
+		mockSystem = EasyMock.createNiceMock (ISystem.class);
+		mockEntity = EasyMock.createNiceMock (Entity.class);
+		mockComponent = EasyMock.createNiceMock (Component.class);
 	}
 	
 	
 	@Test
-	public void getInstanceReturnsNewInstance ()
+	public void testGetInstanceReturnsNewInstance ()
 	{
 		uut = Ecs.getInstance ();
 		
@@ -33,79 +42,55 @@ public class EcsTest extends EasyMockSupport
 	}
 	
 	
-	
-	private class TestScene extends GameScene
+	@Test
+	public void testGetInstanceWithSceneReturnsInstance ()
 	{
-		public TestScene ()
-		{
-			super (TestEntity.class);
-			
-			protoSystems.addAll (Arrays.asList (TestSystem.class));
-		}
+		uut = Ecs.getInstance (TestScene.class);
+		
+		Assert.assertNotNull ("Returned instance must not be null!", uut);
 	}
 	
 	
-	private class TestEntity extends Entity
+	@Test
+	public void testLoadSystem ()
 	{
-		public TestEntity ()
-		{
-			super (TestComponent.class);
-		}
+		uut = Ecs.getInstance ();
+		
+		EasyMock.replay (mockSystem);
+		
+		EasyMock.verify (mockSystem);
 	}
 	
 	
-	private class TestComponent extends Component
+	@Test
+	public void testInstantiate ()
 	{
+		uut = Ecs.getInstance ();
 		
-		private StringProperty testProp = new SimpleStringProperty ();
+		EasyMock.expect (mockEntity.addComponent (Component.class)).andReturn (mockComponent);
 		
+		EasyMock.replay (mockEntity);
 		
-		public String getTestProp ()
-		{
-			return testProp.get ();
-		}
+		uut.instantiate (TestEntity.class);
 		
-		
-		public StringProperty testPropProperty ()
-		{
-			return testProp;
-		}
-		
-		
-		public void setTestProp (String testProp)
-		{
-			this.testProp.set (testProp);
-		}
-		
-		
-		@Override
-		public void start ()
-		{
-		
-		}
+		verifyAll ();
 	}
 	
-	
-	private class TestSystem extends SingleEntitySystem
+	@Test
+	public void testStart ()
 	{
+		uut = Ecs.getInstance ();
 		
-		public TestSystem ()
-		{
-			super (new ComponentKey (KeyOperator.HAS, new KeyGroup (TestComponent.class)));
-		}
+		uut.loadScene (mockScene.getClass ());
 		
-		
-		@Override
-		public void start ()
-		{
-		
-		}
+		uut.start ();
 		
 		
-		@Override
-		public void update ()
-		{
 		
-		}
+		EasyMock.replay (mockScene);
+		
+		EasyMock.expect (mockScene).andVoid ();
+		
+		EasyMock.verify (mockScene);
 	}
 }

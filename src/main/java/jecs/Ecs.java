@@ -5,6 +5,7 @@ import jecs.events.DestructionEvent;
 import jecs.events.EventManager;
 import jecs.events.InstantiationEvent;
 import jecs.events.SystemLoadedEvent;
+import jecs.util.ISystem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class Ecs
 	
 	private EventManager eventManager = null;
 	
-	private List <System> systems = new ArrayList ();
+	private List <ISystem> systems = new ArrayList ();
 	private List <Entity> entities = new ArrayList ();
 	
 	private GameScene activeScene = null;
@@ -68,22 +69,28 @@ public class Ecs
 	
 	public void start ()
 	{
-		loadScene (initialSceneType);
-		
-		for (System system : systems)
+		if (activeScene != null)
 		{
-			system.start ();
+			for (ISystem system : systems)
+			{
+				system.start ();
+			}
+			
+			for (Entity entity : entities)
+			{
+				entity.start ();
+			}
+		}
+		else
+		{
+			System.out.println ("No initial scene type set, cannot start Ecs!");
 		}
 		
-		for (Entity entity : entities)
-		{
-			entity.start ();
-		}
 	}
 	
 	public void update ()
 	{
-		for (System system : systems)
+		for (ISystem system : systems)
 		{
 			system.update ();
 		}
@@ -93,21 +100,6 @@ public class Ecs
 	{
 		this.systems.clear ();
 		this.entities.clear ();
-	}
-	
-	private void loadDefaultSystems ()
-	{
-		if (activeScene != null)
-		{
-			for(Class<? extends System> systemType : activeScene.getProtoSystems ())
-			{
-				loadSystem (systemType);
-			}
-		}
-		else
-		{
-			java.lang.System.out.println ("Could not load scene systems");
-		}
 	}
 	
 	
@@ -123,15 +115,7 @@ public class Ecs
 			activeScene = sceneType.newInstance ();
 			if (activeScene != null)
 			{
-				for (Class <? extends System> systemClass : activeScene.getProtoSystems ())
-				{
-					loadSystem (systemClass);
-				}
-				
-				for (Class<? extends Entity> entityClass : activeScene.getProtoEntities ())
-				{
-					instantiate (entityClass);
-				}
+				activeScene.load ();
 			}
 		} catch (Exception e)
 		{
@@ -150,7 +134,7 @@ public class Ecs
 		eventManager.postEvent (new DestructionEvent (entity));
 	}
 	
-	public <T extends System> T loadSystem (Class<T> systemType)
+	public <T extends ISystem> T loadSystem (Class<T> systemType)
 	{
 		try {
 			T newSystem = systemType.newInstance ();
@@ -174,9 +158,12 @@ public class Ecs
 			
 			for (Class<? extends Component> componentType : newEntity.getComponentSignature ())
 			{
-				Component newComponent = componentType.newInstance ();
-				newComponent.entity = newEntity;
-				newEntity.addComponent (componentType);
+				if (componentType != Transform.class)
+				{
+					Component newComponent = componentType.newInstance ();
+					newComponent.entity = newEntity;
+					newEntity.addComponent (componentType);
+				}
 			}
 			
 			newEntity.start ();
@@ -189,9 +176,9 @@ public class Ecs
 		}
 	}
 	
-	public <T extends System> T getSystem (Class<T> systemType)
+	public <T extends ISystem> T getSystem (Class<T> systemType)
 	{
-		for (System system : systems)
+		for (ISystem system : systems)
 		{
 			if (system.getClass ().equals (systemType))
 			{

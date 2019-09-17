@@ -6,18 +6,32 @@ import javafx.beans.property.SimpleObjectProperty;
 import jecs.events.ComponentAddedEvent;
 import jecs.events.ComponentRemovedEvent;
 import jecs.events.DestructionEvent;
+import jecs.events.InstantiationEvent;
+import jecs.util.ISystem;
 import jecs.util.componentKey.ComponentKey;
 
-public abstract class SingleEntitySystem<T extends Component> extends System
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public abstract class SingleEntitySystem<T extends Component> implements ISystem
 {
 	protected ObjectProperty <Entity> entity = new SimpleObjectProperty <Entity> (null);
+	
+	protected ComponentKey componentKey = null;
+	protected List <ComponentKey> componentKeys = null;
 	
 	
 	public SingleEntitySystem (ComponentKey componentKey)
 	{
-		super ();
-		
 		this.componentKey = componentKey;
+	}
+	
+	
+	public SingleEntitySystem (ComponentKey... componentKeys)
+	{
+		this.componentKeys = new ArrayList <> ();
+		this.componentKeys.addAll (Arrays.asList (componentKeys));
 	}
 	
 	
@@ -32,6 +46,14 @@ public abstract class SingleEntitySystem<T extends Component> extends System
 	
 	@Subscribe
 	@Override
+	public void onInstantiation (InstantiationEvent event)
+	{
+		processEntity (event.getEntity ());
+	}
+	
+	
+	@Subscribe
+	@Override
 	public void onComponentAdded (ComponentAddedEvent event)
 	{
 		if (entity.get () == null)
@@ -39,6 +61,7 @@ public abstract class SingleEntitySystem<T extends Component> extends System
 			processEntity (event.getEntity ());
 		}
 	}
+	
 	
 	@Subscribe
 	@Override
@@ -50,6 +73,7 @@ public abstract class SingleEntitySystem<T extends Component> extends System
 		}
 	}
 	
+	
 	@Subscribe
 	@Override
 	public void onDestruction (DestructionEvent event)
@@ -58,11 +82,5 @@ public abstract class SingleEntitySystem<T extends Component> extends System
 		{
 			this.entity.set (null);
 		}
-	}
-	
-	
-	public Entity getEntity ()
-	{
-		return entity.get ();
 	}
 }

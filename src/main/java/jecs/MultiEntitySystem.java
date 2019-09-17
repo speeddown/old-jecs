@@ -7,19 +7,25 @@ import javafx.collections.FXCollections;
 import jecs.events.ComponentAddedEvent;
 import jecs.events.ComponentRemovedEvent;
 import jecs.events.DestructionEvent;
+import jecs.events.InstantiationEvent;
+import jecs.util.ISystem;
 import jecs.util.componentKey.ComponentKey;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
-public abstract class MultiEntitySystem extends System
+public abstract class MultiEntitySystem implements ISystem
 {
 	/**
 	 * Entities that have passed validation
 	 */
 	protected MapProperty <UUID, Entity> entities =
 			new SimpleMapProperty <UUID, Entity> (FXCollections.observableHashMap ());
+	
+	protected ComponentKey componentKey = null;
+	protected List <ComponentKey> componentKeys = null;
 	
 	
 	public MultiEntitySystem (ComponentKey componentKey)
@@ -30,7 +36,7 @@ public abstract class MultiEntitySystem extends System
 	
 	public MultiEntitySystem (ComponentKey... keys)
 	{
-		this.componentKeys = new ArrayList <ComponentKey> ();
+		this.componentKeys = new ArrayList <> ();
 		this.componentKeys.addAll (Arrays.asList (keys));
 	}
 	
@@ -63,6 +69,13 @@ public abstract class MultiEntitySystem extends System
 				entities.put (entity.getEntityId (), entity);
 			}
 		}
+	}
+	
+	@Subscribe
+	@Override
+	public void onInstantiation (InstantiationEvent event)
+	{
+		processEntity (event.getEntity ());
 	}
 	
 	

@@ -1,26 +1,18 @@
 package jecs;
 
+import jecs.util.ILoadable;
+import jecs.util.ISystem;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
  * A GameScene is essentially a list of entities to load.
  */
-public abstract class GameScene
+public abstract class GameScene implements ILoadable
 {
 	protected List <Class <? extends Entity>> protoEntities = new ArrayList <> ();
-	protected List <Class <? extends System>> protoSystems = new ArrayList <> ();
-	
-	public GameScene ()
-	{
-	
-	}
-	
-	public GameScene (Class<? extends Entity>...entityTypes)
-	{
-		this.protoEntities.addAll (Arrays.asList (entityTypes));
-	}
+	protected List <Class <? extends ISystem>> protoSystems = new ArrayList <> ();
 	
 	
 	public List <Class <? extends Entity>> getProtoEntities ()
@@ -28,5 +20,12 @@ public abstract class GameScene
 		return protoEntities;
 	}
 	
-	public List <Class <? extends System>> getProtoSystems () { return protoSystems; }
+	
+	public List <Class <? extends ISystem>> getProtoSystems ()
+	{
+		return protoSystems;
+	}
+	
+	
+	public abstract void load ();
 }

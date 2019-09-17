@@ -1,19 +1,18 @@
 package jecs.events;
 
-import jecs.System;
+import jecs.util.ISystem;
 
 public class SystemLoadedEvent extends Event
 {
-	private System system = null;
+	private ISystem system = null;
 	
-	
-	public SystemLoadedEvent (System system)
+	public SystemLoadedEvent (ISystem system)
 	{
 		this.system = system;
 	}
 	
 	
-	public System getSystem ()
+	public ISystem getSystem ()
 	{
 		return system;
 	}
